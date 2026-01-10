@@ -86,17 +86,11 @@ runs:
         cd ${{ github.action_path }}
         pip install -r python/requirements.txt
     
-    - name: Build
-      shell: bash
-      run: |
-        cd ${{ github.action_path }}
-        bun run build
-    
     - name: Run PR Reviewer
       shell: bash
       run: |
         cd ${{ github.action_path }}
-        bun dist/main.js
+        bun src/main.ts
       env:
         INPUT_GITHUB-TOKEN: ${{ inputs.github-token }}
         INPUT_OPENAI-API-KEY: ${{ inputs.openai-api-key }}
