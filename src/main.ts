@@ -170,7 +170,7 @@ async function run(): Promise<void> {
       }
     }
 
-    core.info(`\n✅ Analysis complete: ${allIssues.issues.length} issues found`);
+    core.info(`\n✅ Analysis complete: ${allIssues.length} issues found`);
 
     if (allIssues.length === 0) {
       core.info("🎉 No issues detected!");
