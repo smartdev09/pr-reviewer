@@ -74,7 +74,7 @@ export class OpenAIProvider extends BaseAIProvider {
           type: "json_schema",
           json_schema: {
             name: "response",
-            strict: true,
+            strict: false,  // Disable strict mode to allow optional fields
             schema: zodToJsonSchema(schema),
           },
         },
