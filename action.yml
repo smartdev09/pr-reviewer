@@ -92,15 +92,15 @@ runs:
         cd ${{ github.action_path }}
         bun src/main.ts
       env:
-        INPUT_GITHUB_TOKEN: ${{ inputs.github-token }}
-        INPUT_OPENAI_API_KEY: ${{ inputs.openai-api-key }}
-        INPUT_PROVIDER: ${{ inputs.provider }}
-        INPUT_MODEL: ${{ inputs.model }}
-        INPUT_MODE: ${{ inputs.mode }}
-        INPUT_ENABLE-SECURITY: ${{ inputs.enable-security }}
-        INPUT_ENABLE-QUALITY: ${{ inputs.enable-quality }}
-        INPUT_ENABLE-SUGGESTIONS: ${{ inputs.enable-suggestions }}
-        INPUT_INLINE-SEVERITY-THRESHOLD: ${{ inputs.inline-severity-threshold }}
-        INPUT_AGGREGATED-SEVERITY-THRESHOLD: ${{ inputs.aggregated-severity-threshold }}
-        INPUT_IGNORE-PATTERNS: ${{ inputs.ignore-patterns }}
-        INPUT_MAX-TOKENS: ${{ inputs.max-tokens }}
+        INPUT_GITHUB_TOKEN: ${{ inputs['github-token'] }}
+        INPUT_OPENAI_API_KEY: ${{ inputs['openai-api-key'] }}
+        INPUT_PROVIDER: ${{ inputs['provider'] }}
+        INPUT_MODEL: ${{ inputs['model'] }}
+        INPUT_MODE: ${{ inputs['mode'] }}
+        INPUT_ENABLE_SECURITY: ${{ inputs['enable-security'] }}
+        INPUT_ENABLE_QUALITY: ${{ inputs['enable-quality'] }}
+        INPUT_ENABLE_SUGGESTIONS: ${{ inputs['enable-suggestions'] }}
+        INPUT_INLINE_SEVERITY_THRESHOLD: ${{ inputs['inline-severity-threshold'] }}
+        INPUT_AGGREGATED_SEVERITY_THRESHOLD: ${{ inputs['aggregated-severity-threshold'] }}
+        INPUT_IGNORE_PATTERNS: ${{ inputs['ignore-patterns'] }}
+        INPUT_MAX_TOKENS: ${{ inputs['max-tokens'] }}
