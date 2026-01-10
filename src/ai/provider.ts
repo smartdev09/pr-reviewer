@@ -104,6 +104,35 @@ export class OpenAIProvider extends BaseAIProvider {
         if (filteredCount > 0) {
           console.warn(`Filtered out ${filteredCount} malformed items from issues array`);
         }
+        
+        // Normalize security categories to valid enum values
+        parsed.issues = parsed.issues.map((issue: any) => {
+          if (issue.securityCategory) {
+            const validCategories = [
+              "injection", "authentication", "authorization", "cryptography",
+              "xss", "xxe", "deserialization", "ssrf", "csrf", "idor",
+              "secrets", "config", "logging", "api", "other"
+            ];
+            
+            // Map common variations to valid categories
+            const categoryMap: Record<string, string> = {
+              "validation": "other",
+              "schema": "other",
+              "input_validation": "injection",
+              "session": "authentication",
+              "access_control": "authorization",
+              "encryption": "cryptography",
+              "cors": "api",
+            };
+            
+            const category = issue.securityCategory.toLowerCase();
+            if (!validCategories.includes(category)) {
+              issue.securityCategory = categoryMap[category] || "other";
+              console.warn(`Mapped unknown security category '${category}' to '${issue.securityCategory}'`);
+            }
+          }
+          return issue;
+        });
       }
       // Same for suggestions array if present
       if (Array.isArray(parsed.suggestions)) {

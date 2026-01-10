@@ -65,11 +65,15 @@ Code diff:
 - **Logging & Monitoring**: Insufficient security event logging, missing intrusion detection
 
 ## For Each Security Issue:
-1. **Classify the security category** (injection, authentication, xss, etc.)
-2. **Assess exploitability** and **impact**
-3. **Determine severity** based on exploitability + impact using VAPT urgency standards
-4. **Provide specific location** (file and line numbers)
-5. **Give actionable fix** with code example when helpful
+1. **Classify the security category** - Use ONLY these categories:
+   - injection, authentication, authorization, cryptography, xss, xxe, deserialization
+   - ssrf, csrf, idor, secrets, config, logging, api, other
+2. **Assess exploitability** - Use ONLY: easy, medium, hard
+3. **Assess impact** - Use ONLY: system_compromise, data_breach, privilege_escalation, 
+   information_disclosure, denial_of_service, data_modification, minimal
+4. **Determine severity** based on exploitability + impact using VAPT urgency standards
+5. **Provide specific location** (file and line numbers)
+6. **Give actionable fix** with code example when helpful
 
 ## Output Priority:
 1. Vulnerabilities (sorted by severity: critical → high → medium → low → info)
