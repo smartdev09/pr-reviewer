@@ -86,6 +86,18 @@ runs:
         cd ${{ github.action_path }}
         pip install -r python/requirements.txt
     
+    - name: Debug Inputs
+      shell: bash
+      run: |
+        echo "=== Debug Info ==="
+        echo "Input github-token length: ${#INPUT_GITHUB_TOKEN}"
+        echo "Input openai-api-key length: ${#INPUT_OPENAI_API_KEY}"
+        echo "All INPUT_ vars:"
+        env | grep "^INPUT_" || echo "None found"
+      env:
+        INPUT_GITHUB_TOKEN: ${{ inputs['github-token'] }}
+        INPUT_OPENAI_API_KEY: ${{ inputs['openai-api-key'] }}
+    
     - name: Run PR Reviewer
       shell: bash
       run: |
@@ -94,9 +106,9 @@ runs:
       env:
         INPUT_GITHUB_TOKEN: ${{ inputs['github-token'] }}
         INPUT_OPENAI_API_KEY: ${{ inputs['openai-api-key'] }}
-        INPUT_PROVIDER: ${{ inputs['provider'] }}
-        INPUT_MODEL: ${{ inputs['model'] }}
-        INPUT_MODE: ${{ inputs['mode'] }}
+        INPUT_PROVIDER: ${{ inputs.provider }}
+        INPUT_MODEL: ${{ inputs.model }}
+        INPUT_MODE: ${{ inputs.mode }}
         INPUT_ENABLE_SECURITY: ${{ inputs['enable-security'] }}
         INPUT_ENABLE_QUALITY: ${{ inputs['enable-quality'] }}
         INPUT_ENABLE_SUGGESTIONS: ${{ inputs['enable-suggestions'] }}
