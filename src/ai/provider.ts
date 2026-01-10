@@ -118,8 +118,11 @@ function zodToJsonSchema(schema: z.ZodTypeAny): any {
     const required: string[] = [];
     
     for (const [key, value] of Object.entries(shape)) {
-      properties[key] = zodToJsonSchema(value as z.ZodTypeAny);
-      if (!(value as any).isOptional()) {
+      const fieldSchema = value as z.ZodTypeAny;
+      properties[key] = zodToJsonSchema(fieldSchema);
+      
+      // Check if field is optional by checking if it's a ZodOptional instance
+      if (!(fieldSchema instanceof z.ZodOptional)) {
         required.push(key);
       }
     }
@@ -146,7 +149,16 @@ function zodToJsonSchema(schema: z.ZodTypeAny): any {
   }
   
   if (schema instanceof z.ZodNumber) {
-    return { type: "number" };
+    const result: any = { type: "number" };
+    // Add integer constraint if present
+    if (def.checks) {
+      for (const check of def.checks) {
+        if (check.kind === "int") {
+          result.type = "integer";
+        }
+      }
+    }
+    return result;
   }
   
   if (schema instanceof z.ZodBoolean) {

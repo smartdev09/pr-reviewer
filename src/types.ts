@@ -92,10 +92,10 @@ export type SecurityCategory = z.infer<typeof SecurityCategorySchema>;
 export const LocationSchema = z
   .object({
     file: z.string().describe("File path where the issue is located"),
-    startLine: z.number().int().positive().optional(),
-    endLine: z.number().int().positive().optional(),
+    startLine: z.number().int().positive().describe("Starting line number"),
+    endLine: z.number().int().positive().describe("Ending line number"),
   })
-  .optional();
+  .describe("Location of the issue in the codebase");
 
 export type Location = z.infer<typeof LocationSchema>;
 
@@ -104,7 +104,7 @@ export const ReviewIssueSchema = z.object({
   severity: SeveritySchema,
   description: z.string().describe("Brief 2-line summary"),
   explanation: z.string().describe("Detailed explanation of the issue"),
-  location: LocationSchema,
+  location: LocationSchema.optional(),
   suggestion: z.string().optional().describe("Fix suggestion"),
   codeSnippet: z.string().optional().describe("Code example for fix"),
   // Security-specific
@@ -128,7 +128,7 @@ export type ReviewResponse = z.infer<typeof ReviewResponseSchema>;
 export const CodeSuggestionSchema = z.object({
   title: z.string(),
   description: z.string(),
-  location: LocationSchema,
+  location: LocationSchema.optional(),
   original_code: z.string().optional(),
   suggested_code: z.string(),
   reasoning: z.string(),
