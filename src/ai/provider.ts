@@ -92,13 +92,44 @@ export class OpenAIProvider extends BaseAIProvider {
     const content = result.choices[0].message.content;
     const parsed = JSON.parse(content);
 
-    // Validate with schema
-    const validated = schema.parse(parsed);
+    // Clean up malformed data (OpenAI sometimes adds string comments in arrays)
+    if (parsed && typeof parsed === 'object') {
+      // If response has an 'issues' array, filter out non-object items
+      if (Array.isArray(parsed.issues)) {
+        const originalLength = parsed.issues.length;
+        parsed.issues = parsed.issues.filter((item: any) => {
+          return item && typeof item === 'object' && !Array.isArray(item);
+        });
+        const filteredCount = originalLength - parsed.issues.length;
+        if (filteredCount > 0) {
+          console.warn(`Filtered out ${filteredCount} malformed items from issues array`);
+        }
+      }
+      // Same for suggestions array if present
+      if (Array.isArray(parsed.suggestions)) {
+        const originalLength = parsed.suggestions.length;
+        parsed.suggestions = parsed.suggestions.filter((item: any) => {
+          return item && typeof item === 'object' && !Array.isArray(item);
+        });
+        const filteredCount = originalLength - parsed.suggestions.length;
+        if (filteredCount > 0) {
+          console.warn(`Filtered out ${filteredCount} malformed items from suggestions array`);
+        }
+      }
+    }
 
-    return {
-      data: validated,
-      usage: result.usage,
-    };
+    // Validate with schema
+    try {
+      const validated = schema.parse(parsed);
+      return {
+        data: validated,
+        usage: result.usage,
+      };
+    } catch (error) {
+      // Log the actual response for debugging
+      console.error("Schema validation failed. OpenAI response:", JSON.stringify(parsed, null, 2));
+      throw error;
+    }
   }
 }
 

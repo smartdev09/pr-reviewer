@@ -71,7 +71,14 @@ Code diff:
 3. **Suggest concrete fix** (with code example when helpful)
 4. **Classify severity** (critical, high, medium, low, info)
 
-Focus on actionable feedback that improves code quality without bikeshedding minor style preferences.`;
+Focus on actionable feedback that improves code quality without bikeshedding minor style preferences.
+
+## IMPORTANT - Output Format:
+Return ONLY valid JSON objects in the issues array. Do NOT include:
+- String comments or notes
+- Empty strings
+- Explanatory text outside the schema
+Each issue MUST be a complete JSON object with all required fields.`;
 
 export function buildQualityPrompt(diff: string): string {
   return QUALITY_USER_PROMPT.replace("{diff}", diff);

@@ -76,7 +76,14 @@ Code diff:
 2. Misconfigurations (sorted by severity)
 3. Best practices (sorted by severity)
 
-Remember: When in doubt about severity, err on the side of caution for security issues. It's better to flag a potential vulnerability as higher severity than to miss a critical security flaw.`;
+Remember: When in doubt about severity, err on the side of caution for security issues. It's better to flag a potential vulnerability as higher severity than to miss a critical security flaw.
+
+## IMPORTANT - Output Format:
+Return ONLY valid JSON objects in the issues array. Do NOT include:
+- String comments or notes
+- Empty strings
+- Explanatory text outside the schema
+Each issue MUST be a complete JSON object with all required fields (title, severity, description, explanation, etc.).`;
 
 export function buildSecurityPrompt(diff: string): string {
   return SECURITY_USER_PROMPT.replace("{diff}", diff);
