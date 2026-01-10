@@ -92,8 +92,8 @@ runs:
         cd ${{ github.action_path }}
         bun src/main.ts
       env:
-        INPUT_GITHUB-TOKEN: ${{ inputs.github-token }}
-        INPUT_OPENAI-API-KEY: ${{ inputs.openai-api-key }}
+        INPUT_GITHUB_TOKEN: ${{ inputs.github-token }}
+        INPUT_OPENAI_API_KEY: ${{ inputs.openai-api-key }}
         INPUT_PROVIDER: ${{ inputs.provider }}
         INPUT_MODEL: ${{ inputs.model }}
         INPUT_MODE: ${{ inputs.mode }}
