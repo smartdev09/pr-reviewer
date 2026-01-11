@@ -11,6 +11,7 @@ jobs:
   review:
     name: Review PR
     runs-on: ubuntu-latest
+    # environment: prod  # Uncomment if using environment secrets
     permissions:
       pull-requests: write
       contents: read

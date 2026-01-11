@@ -9,6 +9,7 @@ jobs:
   review:
     name: Review PR
     runs-on: ubuntu-latest
+    environment: prod  # Add this to access prod environment secrets
     permissions:
       pull-requests: write
       contents: read

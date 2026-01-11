@@ -71,7 +71,22 @@ Code diff:
 3. **Suggest concrete fix** (with code example when helpful)
 4. **Classify severity** (critical, high, medium, low, info)
 
-Focus on actionable feedback that improves code quality without bikeshedding minor style preferences.`;
+Focus on actionable feedback that improves code quality without bikeshedding minor style preferences.
+
+## IMPORTANT - Output Format:
+Return ONLY valid JSON objects in the issues array. Do NOT include:
+- String comments or notes
+- Empty strings
+- Explanatory text outside the schema
+Each issue MUST be a complete JSON object with all required fields.
+
+## CRITICAL - Do NOT Include Security Fields:
+Quality reviews should NOT include these fields (they are for security reviews only):
+- securityCategory (omit this field)
+- exploitability (omit this field)
+- impact (omit this field)
+
+Only include: title, severity, description, explanation, location, suggestion, codeSnippet`;
 
 export function buildQualityPrompt(diff: string): string {
   return QUALITY_USER_PROMPT.replace("{diff}", diff);

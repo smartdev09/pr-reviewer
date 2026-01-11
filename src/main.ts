@@ -170,7 +170,7 @@ async function run(): Promise<void> {
       }
     }
 
-    core.info(`\n✅ Analysis complete: ${allIssues.issues.length} issues found`);
+    core.info(`\n✅ Analysis complete: ${allIssues.length} issues found`);
 
     if (allIssues.length === 0) {
       core.info("🎉 No issues detected!");
@@ -223,24 +223,32 @@ async function run(): Promise<void> {
 }
 
 function loadConfig(): Config {
+  // Read from environment variables directly (composite actions)
+  const getEnvInput = (name: string, required = false): string => {
+    const value = process.env[`INPUT_${name.toUpperCase().replace(/-/g, "_")}`] || "";
+    if (required && !value) {
+      throw new Error(`Input required and not supplied: ${name}`);
+    }
+    return value;
+  };
+
   return {
-    githubToken: core.getInput("github-token", { required: true }),
-    apiKey: core.getInput("openai-api-key", { required: true }),
-    provider: core.getInput("provider") || "openai",
-    model: core.getInput("model") || undefined,
-    mode: core.getInput("mode") || "auto",
-    enableSecurity: core.getInput("enable-security") !== "false",
-    enableQuality: core.getInput("enable-quality") !== "false",
-    enableSuggestions: core.getInput("enable-suggestions") !== "false",
+    githubToken: getEnvInput("github-token", true),
+    apiKey: getEnvInput("openai-api-key", true),
+    provider: getEnvInput("provider") || "openai",
+    model: getEnvInput("model") || undefined,
+    mode: getEnvInput("mode") || "auto",
+    enableSecurity: getEnvInput("enable-security") !== "false",
+    enableQuality: getEnvInput("enable-quality") !== "false",
+    enableSuggestions: getEnvInput("enable-suggestions") !== "false",
     inlineSeverityThreshold:
-      (core.getInput("inline-severity-threshold") as Severity) || "high",
+      (getEnvInput("inline-severity-threshold") as Severity) || "high",
     aggregatedSeverityThreshold:
-      (core.getInput("aggregated-severity-threshold") as Severity) || "medium",
-    ignorePatterns: core
-      .getInput("ignore-patterns")
+      (getEnvInput("aggregated-severity-threshold") as Severity) || "medium",
+    ignorePatterns: getEnvInput("ignore-patterns")
       .split("\n")
       .filter((p) => p.trim()),
-    maxTokens: parseInt(core.getInput("max-tokens")) || 8000,
+    maxTokens: parseInt(getEnvInput("max-tokens")) || 8000,
   };
 }
 

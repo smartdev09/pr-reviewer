@@ -48,16 +48,12 @@ cd ..
 echo "🔍 Type checking TypeScript..."
 bun run typecheck
 
-# 8. Build
-echo "🔨 Building..."
-bun run build
-
 echo ""
 echo "✨ All tests passed!"
 echo ""
 echo "To use locally, set these environment variables:"
 echo "  export GITHUB_TOKEN='your_token'"
-echo "  export INPUT_GITHUB-TOKEN='your_token'"
-echo "  export INPUT_OPENAI-API-KEY='your_openai_key'"
+echo "  export INPUT_GITHUB_TOKEN='your_token'"
+echo "  export INPUT_OPENAI_API_KEY='your_openai_key'"
 echo ""
-echo "Then run: bun dist/main.js"
+echo "Then run: bun src/main.ts"

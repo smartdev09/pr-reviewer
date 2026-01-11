@@ -74,7 +74,7 @@ export class OpenAIProvider extends BaseAIProvider {
           type: "json_schema",
           json_schema: {
             name: "response",
-            strict: true,
+            strict: true,  // Enable strict mode with nullable fields
             schema: zodToJsonSchema(schema),
           },
         },
@@ -92,13 +92,19 @@ export class OpenAIProvider extends BaseAIProvider {
     const content = result.choices[0].message.content;
     const parsed = JSON.parse(content);
 
-    // Validate with schema
-    const validated = schema.parse(parsed);
-
-    return {
-      data: validated,
-      usage: result.usage,
-    };
+    // With strict mode enabled, OpenAI validates against the schema
+    // so we can directly parse and validate
+    try {
+      const validated = schema.parse(parsed);
+      return {
+        data: validated,
+        usage: result.usage,
+      };
+    } catch (error) {
+      // Log the actual response for debugging
+      console.error("Schema validation failed. OpenAI response:", JSON.stringify(parsed, null, 2));
+      throw error;
+    }
   }
 }
 
@@ -118,8 +124,11 @@ function zodToJsonSchema(schema: z.ZodTypeAny): any {
     const required: string[] = [];
     
     for (const [key, value] of Object.entries(shape)) {
-      properties[key] = zodToJsonSchema(value as z.ZodTypeAny);
-      if (!(value as any).isOptional()) {
+      const fieldSchema = value as z.ZodTypeAny;
+      properties[key] = zodToJsonSchema(fieldSchema);
+      
+      // Check if field is optional by checking if it's a ZodOptional instance
+      if (!(fieldSchema instanceof z.ZodOptional)) {
         required.push(key);
       }
     }
@@ -141,12 +150,23 @@ function zodToJsonSchema(schema: z.ZodTypeAny): any {
   
   if (schema instanceof z.ZodString) {
     const result: any = { type: "string" };
-    if (def.description) result.description = def.description;
+    // Add description from schema if available
+    const description = (schema as any).description;
+    if (description) result.description = description;
     return result;
   }
   
   if (schema instanceof z.ZodNumber) {
-    return { type: "number" };
+    const result: any = { type: "number" };
+    // Add integer constraint if present
+    if (def.checks) {
+      for (const check of def.checks) {
+        if (check.kind === "int") {
+          result.type = "integer";
+        }
+      }
+    }
+    return result;
   }
   
   if (schema instanceof z.ZodBoolean) {
@@ -166,9 +186,12 @@ function zodToJsonSchema(schema: z.ZodTypeAny): any {
   
   if (schema instanceof z.ZodNullable) {
     const inner = zodToJsonSchema(def.innerType);
+    // For OpenAI strict mode, use anyOf with null type
     return {
-      ...inner,
-      nullable: true,
+      anyOf: [
+        inner,
+        { type: "null" }
+      ]
     };
   }
   

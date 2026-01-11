@@ -69,9 +69,14 @@ curl -fsSL https://bun.sh/install | bash
 bun install
 pip install -r python/requirements.txt
 
-# Build
-bun run build
+# Run directly (Bun runs TypeScript natively!)
+bun src/main.ts
+
+# Or use dev script
+bun run dev
 ```
+
+**Note**: Bun runs TypeScript natively, so no build step is needed! The GitHub Action runs `bun src/main.ts` directly for faster startup.
 
 ### Usage (GitHub Action)
 
@@ -258,3 +263,4 @@ MIT
 ## Contributing
 
 Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+# Test

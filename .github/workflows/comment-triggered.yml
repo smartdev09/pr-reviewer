@@ -12,6 +12,7 @@ jobs:
     # Only run on PR comments (not issue comments)
     if: github.event.issue.pull_request && contains(github.event.comment.body, '@pr-review')
     runs-on: ubuntu-latest
+    environment: prod  # Add this to access prod environment secrets
     permissions:
       pull-requests: write
       contents: read
