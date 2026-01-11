@@ -7,10 +7,10 @@ import { z } from "zod";
 export const FileChangeSchema = z.object({
   filename: z.string(),
   status: z.string(),
-  patch: z.string().optional(),
+  patch: z.string().nullable().describe("Patch content, null if not available"),
   additions: z.number(),
   deletions: z.number(),
-  tokens: z.number().optional(),
+  tokens: z.number().nullable().describe("Token count, null if not calculated"),
 });
 
 export type FileChange = z.infer<typeof FileChangeSchema>;
@@ -37,7 +37,7 @@ export const TokenManagerOutputSchema = z.object({
   compression_stats: z.object({
     original_tokens: z.number(),
     after_deletion_removal: z.number(),
-    after_packing: z.number().optional(),
+    after_packing: z.number().nullable().describe("Tokens after packing, null if not applicable"),
     savings_percent: z.number(),
     chunks: z.number(),
   }),
@@ -104,13 +104,13 @@ export const ReviewIssueSchema = z.object({
   severity: SeveritySchema,
   description: z.string().describe("Brief 2-line summary"),
   explanation: z.string().describe("Detailed explanation of the issue"),
-  location: LocationSchema.optional(),
-  suggestion: z.string().optional().describe("Fix suggestion"),
-  codeSnippet: z.string().optional().describe("Code example for fix"),
-  // Security-specific
-  securityCategory: SecurityCategorySchema.optional(),
-  exploitability: ExploitabilitySchema.optional(),
-  impact: ImpactSchema.optional(),
+  location: LocationSchema.nullable().describe("Location of the issue in the codebase"),
+  suggestion: z.string().nullable().describe("Fix suggestion"),
+  codeSnippet: z.string().nullable().describe("Code example for fix"),
+  // Security-specific (null for quality reviews)
+  securityCategory: SecurityCategorySchema.nullable().describe("Security category, null for non-security issues"),
+  exploitability: ExploitabilitySchema.nullable().describe("How easy to exploit, null for non-security issues"),
+  impact: ImpactSchema.nullable().describe("Potential impact, null for non-security issues"),
 });
 
 export type ReviewIssue = z.infer<typeof ReviewIssueSchema>;
@@ -128,8 +128,8 @@ export type ReviewResponse = z.infer<typeof ReviewResponseSchema>;
 export const CodeSuggestionSchema = z.object({
   title: z.string(),
   description: z.string(),
-  location: LocationSchema.optional(),
-  original_code: z.string().optional(),
+  location: LocationSchema.nullable().describe("Location of the suggestion"),
+  original_code: z.string().nullable().describe("Original code to replace"),
   suggested_code: z.string(),
   reasoning: z.string(),
 });
@@ -147,7 +147,7 @@ export type SuggestionsResponse = z.infer<typeof SuggestionsResponseSchema>;
 // ============================================================================
 
 export const PRDescriptionSchema = z.object({
-  title: z.string().optional(),
+  title: z.string().nullable().describe("Optional title for the PR"),
   summary: z.string(),
   type: z.enum(["feature", "bugfix", "refactor", "docs", "chore", "test"]),
   changes: z.array(
@@ -157,8 +157,8 @@ export const PRDescriptionSchema = z.object({
       description: z.string(),
     })
   ),
-  breaking_changes: z.array(z.string()).optional(),
-  related_issues: z.array(z.string()).optional(),
+  breaking_changes: z.array(z.string()).nullable().describe("List of breaking changes, or null if none"),
+  related_issues: z.array(z.string()).nullable().describe("Related issue numbers, or null if none"),
 });
 
 export type PRDescription = z.infer<typeof PRDescriptionSchema>;

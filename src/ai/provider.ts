@@ -74,7 +74,7 @@ export class OpenAIProvider extends BaseAIProvider {
           type: "json_schema",
           json_schema: {
             name: "response",
-            strict: false,  // Disable strict mode to allow optional fields
+            strict: true,  // Enable strict mode with nullable fields
             schema: zodToJsonSchema(schema),
           },
         },
@@ -92,88 +92,8 @@ export class OpenAIProvider extends BaseAIProvider {
     const content = result.choices[0].message.content;
     const parsed = JSON.parse(content);
 
-    // Clean up malformed data (OpenAI sometimes adds string comments in arrays)
-    if (parsed && typeof parsed === 'object') {
-      // If response has an 'issues' array, filter out non-object items
-      if (Array.isArray(parsed.issues)) {
-        const originalLength = parsed.issues.length;
-        parsed.issues = parsed.issues.filter((item: any) => {
-          return item && typeof item === 'object' && !Array.isArray(item);
-        });
-        const filteredCount = originalLength - parsed.issues.length;
-        if (filteredCount > 0) {
-          console.warn(`Filtered out ${filteredCount} malformed items from issues array`);
-        }
-        
-        // Normalize and clean up issue fields
-        parsed.issues = parsed.issues.map((issue: any) => {
-          // Normalize security categories to valid enum values
-          if (issue.securityCategory) {
-            const validCategories = [
-              "injection", "authentication", "authorization", "cryptography",
-              "xss", "xxe", "deserialization", "ssrf", "csrf", "idor",
-              "secrets", "config", "logging", "api", "other"
-            ];
-            
-            // Map common variations to valid categories
-            const categoryMap: Record<string, string> = {
-              "validation": "other",
-              "schema": "other",
-              "input_validation": "injection",
-              "session": "authentication",
-              "access_control": "authorization",
-              "encryption": "cryptography",
-              "cors": "api",
-            };
-            
-            const category = issue.securityCategory.toLowerCase();
-            if (!validCategories.includes(category)) {
-              issue.securityCategory = categoryMap[category] || "other";
-              console.warn(`Mapped unknown security category '${category}' to '${issue.securityCategory}'`);
-            }
-          }
-          
-          // Normalize exploitability values (easy, medium, hard)
-          if (issue.exploitability) {
-            const exploitabilityMap: Record<string, string> = {
-              "low": "hard",
-              "high": "easy",
-              "critical": "easy",
-              "info": "hard",
-            };
-            
-            const exploitability = issue.exploitability.toLowerCase();
-            if (!["easy", "medium", "hard"].includes(exploitability)) {
-              issue.exploitability = exploitabilityMap[exploitability] || "medium";
-              console.warn(`Mapped invalid exploitability '${exploitability}' to '${issue.exploitability}'`);
-            }
-          }
-          
-          // Remove security fields if no securityCategory is present
-          // (Quality reviews shouldn't have security fields)
-          if (!issue.securityCategory) {
-            delete issue.exploitability;
-            delete issue.impact;
-            delete issue.securityCategory;
-          }
-          
-          return issue;
-        });
-      }
-      // Same for suggestions array if present
-      if (Array.isArray(parsed.suggestions)) {
-        const originalLength = parsed.suggestions.length;
-        parsed.suggestions = parsed.suggestions.filter((item: any) => {
-          return item && typeof item === 'object' && !Array.isArray(item);
-        });
-        const filteredCount = originalLength - parsed.suggestions.length;
-        if (filteredCount > 0) {
-          console.warn(`Filtered out ${filteredCount} malformed items from suggestions array`);
-        }
-      }
-    }
-
-    // Validate with schema
+    // With strict mode enabled, OpenAI validates against the schema
+    // so we can directly parse and validate
     try {
       const validated = schema.parse(parsed);
       return {
@@ -230,7 +150,9 @@ function zodToJsonSchema(schema: z.ZodTypeAny): any {
   
   if (schema instanceof z.ZodString) {
     const result: any = { type: "string" };
-    if (def.description) result.description = def.description;
+    // Add description from schema if available
+    const description = (schema as any).description;
+    if (description) result.description = description;
     return result;
   }
   
@@ -264,9 +186,12 @@ function zodToJsonSchema(schema: z.ZodTypeAny): any {
   
   if (schema instanceof z.ZodNullable) {
     const inner = zodToJsonSchema(def.innerType);
+    // For OpenAI strict mode, use anyOf with null type
     return {
-      ...inner,
-      nullable: true,
+      anyOf: [
+        inner,
+        { type: "null" }
+      ]
     };
   }
   
