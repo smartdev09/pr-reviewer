@@ -78,7 +78,15 @@ Return ONLY valid JSON objects in the issues array. Do NOT include:
 - String comments or notes
 - Empty strings
 - Explanatory text outside the schema
-Each issue MUST be a complete JSON object with all required fields.`;
+Each issue MUST be a complete JSON object with all required fields.
+
+## CRITICAL - Do NOT Include Security Fields:
+Quality reviews should NOT include these fields (they are for security reviews only):
+- securityCategory (omit this field)
+- exploitability (omit this field)
+- impact (omit this field)
+
+Only include: title, severity, description, explanation, location, suggestion, codeSnippet`;
 
 export function buildQualityPrompt(diff: string): string {
   return QUALITY_USER_PROMPT.replace("{diff}", diff);

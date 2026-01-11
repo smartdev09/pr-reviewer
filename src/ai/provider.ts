@@ -105,8 +105,9 @@ export class OpenAIProvider extends BaseAIProvider {
           console.warn(`Filtered out ${filteredCount} malformed items from issues array`);
         }
         
-        // Normalize security categories to valid enum values
+        // Normalize and clean up issue fields
         parsed.issues = parsed.issues.map((issue: any) => {
+          // Normalize security categories to valid enum values
           if (issue.securityCategory) {
             const validCategories = [
               "injection", "authentication", "authorization", "cryptography",
@@ -131,6 +132,31 @@ export class OpenAIProvider extends BaseAIProvider {
               console.warn(`Mapped unknown security category '${category}' to '${issue.securityCategory}'`);
             }
           }
+          
+          // Normalize exploitability values (easy, medium, hard)
+          if (issue.exploitability) {
+            const exploitabilityMap: Record<string, string> = {
+              "low": "hard",
+              "high": "easy",
+              "critical": "easy",
+              "info": "hard",
+            };
+            
+            const exploitability = issue.exploitability.toLowerCase();
+            if (!["easy", "medium", "hard"].includes(exploitability)) {
+              issue.exploitability = exploitabilityMap[exploitability] || "medium";
+              console.warn(`Mapped invalid exploitability '${exploitability}' to '${issue.exploitability}'`);
+            }
+          }
+          
+          // Remove security fields if no securityCategory is present
+          // (Quality reviews shouldn't have security fields)
+          if (!issue.securityCategory) {
+            delete issue.exploitability;
+            delete issue.impact;
+            delete issue.securityCategory;
+          }
+          
           return issue;
         });
       }
